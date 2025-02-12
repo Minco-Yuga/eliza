@@ -8,14 +8,18 @@ RUN npm install -g pnpm@9.4.0 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y libsqlite3-dev gcc make
+
+
 # Set Python 3 as the default python
 RUN ln -s /usr/bin/python3 /usr/bin/python
+
 
 # Set the working directory
 WORKDIR /app
 
 # Copy package.json and other configuration files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc turbo.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc turbo.json .env ./
 
 # Copy the rest of the application code
 COPY agent ./agent
@@ -38,6 +42,8 @@ RUN npm install -g pnpm@9.4.0 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y libsqlite3-dev gcc make
+
 WORKDIR /app
 
 # Copy built artifacts and production dependencies from the builder stage
@@ -50,6 +56,9 @@ COPY --from=builder /app/agent ./agent
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/characters ./characters
+COPY --from=builder /app/.env ./
+# Expose the port the agent endpoint uses
+EXPOSE 3000
 
 # Set the command to run the application
-CMD ["pnpm", "start", "--non-interactive"]
+CMD ["pnpm", "start", "--non-interactive", "--characters='../characters/shaman.character.json'"]

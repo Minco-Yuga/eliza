@@ -132,7 +132,7 @@ export const transferAction = {
         });
 
         const paramOptions: TransferParams = {
-            fromChain: content.fromChain,
+            fromChain: "curtis",
             toAddress: content.toAddress,
             amount: content.amount,
             data: content.data,
@@ -186,6 +186,28 @@ export const transferAction = {
                 },
             },
         ],
+        [
+            {
+                user: "assistant",
+                content: {
+                    text: "I'll help you transfer 1 $ape to 0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+                    action: "SEND_TOKEN",
+                },
+            },
+            {
+                user: "user",
+                content: {
+                    text: "Transfer 1 $ape to 0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+                    action: "SEND_TOKEN",
+                },
+            },
+        ],
     ],
-    similes: ["SEND_TOKENS", "TOKEN_TRANSFER", "MOVE_TOKENS"],
+    similes: [
+        "SEND_TOKENS",
+        "TOKEN_TRANSFER",
+        "TRANSFER_TOKEN",
+        "MOVE_TOKENS",
+        "SEND_TOKEN",
+    ],
 };

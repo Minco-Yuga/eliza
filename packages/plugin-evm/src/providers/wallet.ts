@@ -5,7 +5,13 @@ import {
     http,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import type { IAgentRuntime, Provider, Memory, State } from "@ai16z/eliza";
+import {
+    type IAgentRuntime,
+    type Provider,
+    type Memory,
+    type State,
+    elizaLogger,
+} from "@ai16z/eliza";
 import type {
     Address,
     WalletClient,
@@ -20,17 +26,15 @@ import * as viemChains from "viem/chains";
 import type { SupportedChain } from "../types";
 
 export class WalletProvider {
-    private currentChain: SupportedChain = "mainnet";
-    chains: Record<string, Chain> = { mainnet: viemChains.mainnet };
+    private currentChain: SupportedChain = "curtis";
+    chains: Record<string, Chain> = { curtis: viemChains.curtis };
     account: PrivateKeyAccount;
 
-    constructor(privateKey: `0x${string}`, chains?: Record<string, Chain>) {
+    constructor(privateKey: `0x${string}`) {
+        //, chains?: Record<string, Chain>) {
         this.setAccount(privateKey);
-        this.setChains(chains);
-
-        if (chains && Object.keys(chains).length > 0) {
-            this.setCurrentChain(Object.keys(chains)[0] as SupportedChain);
-        }
+        this.setChains(this.chains);
+        this.setCurrentChain(this.currentChain);
     }
 
     getAddress(): Address {
@@ -44,6 +48,7 @@ export class WalletProvider {
     getPublicClient(
         chainName: SupportedChain
     ): PublicClient<HttpTransport, Chain, Account | undefined> {
+        elizaLogger.info("GETTING PUBLIC CLIENT FOR:", chainName);
         const transport = this.createHttpTransport(chainName);
 
         const publicClient = createPublicClient({
@@ -132,15 +137,19 @@ export class WalletProvider {
     };
 
     private setCurrentChain = (chain: SupportedChain) => {
+        console.log("SETTING CURRENT CHAIN", chain);
         this.currentChain = chain;
     };
 
     private createHttpTransport = (chainName: SupportedChain) => {
+        elizaLogger.info("CREATING HTTP TRANSPORT FOR:", chainName);
         const chain = this.chains[chainName];
 
         if (chain.rpcUrls.custom) {
+            elizaLogger.info("CUSTOM RPC URL:", chain.rpcUrls);
             return http(chain.rpcUrls.custom.http[0]);
         }
+        elizaLogger.info("DEFAULT RPC URL:", chain.rpcUrls);
         return http(chain.rpcUrls.default.http[0]);
     };
 
@@ -203,9 +212,9 @@ export const initWalletProvider = (runtime: IAgentRuntime) => {
         throw new Error("EVM_PRIVATE_KEY is missing");
     }
 
-    const chains = genChainsFromRuntime(runtime);
+    // const chains = genChainsFromRuntime(runtime);
 
-    return new WalletProvider(privateKey as `0x${string}`, chains);
+    return new WalletProvider(privateKey as `0x${string}`); //, chains);
 };
 
 export const evmWalletProvider: Provider = {
@@ -214,11 +223,16 @@ export const evmWalletProvider: Provider = {
         message: Memory,
         state?: State
     ): Promise<string | null> {
+        elizaLogger.info("EVM WALLET PROVIDER GET");
         try {
             const walletProvider = initWalletProvider(runtime);
             const address = walletProvider.getAddress();
             const balance = await walletProvider.getWalletBalance();
             const chain = walletProvider.getCurrentChain();
+            console.log("WALLET PROVIDER ADDED");
+            elizaLogger.info(
+                `EVM Wallet Address: ${address}\nBalance: ${balance} ${chain.nativeCurrency.symbol}\nChain ID: ${chain.id}, Name: ${chain.name}`
+            );
             return `EVM Wallet Address: ${address}\nBalance: ${balance} ${chain.nativeCurrency.symbol}\nChain ID: ${chain.id}, Name: ${chain.name}`;
         } catch (error) {
             console.error("Error in EVM wallet provider:", error);

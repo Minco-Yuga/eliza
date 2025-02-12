@@ -407,22 +407,27 @@ export class AgentRuntime implements IAgentRuntime {
     }
 
     async stop() {
-      elizaLogger.debug('runtime::stop - character', this.character)
-      // stop services, they don't have a stop function
+        elizaLogger.debug("runtime::stop - character", this.character);
+        // stop services, they don't have a stop function
         // just initialize
 
-      // plugins
+        // plugins
         // have actions, providers, evaluators (no start/stop)
         // services (just initialized), clients
 
-      // client have a start
-      for(const cStr in this.clients) {
-        const c = this.clients[cStr]
-        elizaLogger.log('runtime::stop - requesting', cStr, 'client stop for', this.character.name)
-        c.stop()
-      }
-      // we don't need to unregister with directClient
-      // don't need to worry about knowledge
+        // client have a start
+        for (const cStr in this.clients) {
+            const c = this.clients[cStr];
+            elizaLogger.log(
+                "runtime::stop - requesting",
+                cStr,
+                "client stop for",
+                this.character.name
+            );
+            c.stop();
+        }
+        // we don't need to unregister with directClient
+        // don't need to worry about knowledge
     }
 
     /**
@@ -985,11 +990,8 @@ Text: ${attachment.text}
         // if bio is a string, use it. if its an array, pick one at random
         let bio = this.character.bio || "";
         if (Array.isArray(bio)) {
-            // get three random bio strings and join them with " "
-            bio = bio
-                .sort(() => 0.5 - Math.random())
-                .slice(0, 3)
-                .join(" ");
+            // always include the first entry then get three random bio strings and join them with " "
+            bio = [bio[0], ...bio.sort(() => 0.5 - Math.random()).slice(1, 4)];
         }
 
         const knowledegeData = await knowledge.get(this, message);

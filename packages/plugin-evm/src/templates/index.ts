@@ -14,7 +14,7 @@ Respond with a JSON markdown block containing only the extracted values. All fie
 
 \`\`\`json
 {
-    "fromChain": SUPPORTED_CHAINS,
+    "fromChain": "curtis",
     "amount": string,
     "toAddress": string,
     "token": string | null
